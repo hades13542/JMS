@@ -73,43 +73,50 @@ public class Examples extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		out.println("Test start <br>");
 
+		// Tworzenie fabryki polaczen tematow
 		TopicConnectionFactory connectionFactory = (TopicConnectionFactory) new InitialContext()
 				.lookup("java:comp/env/jmsTCF");
 
+		// Szukanie tematu na podstawie danych JNDI
 		Topic topic = (Topic) new InitialContext().lookup("java:comp/env/jmsTopic");
 
+		// Tworzenie kontekstu dla JMS
 		JMSContext jmsContext = connectionFactory.createContext();
 
-		//JMSConsumer consumer = jmsContext.createConsumer(topic);
-		JMSConsumer consumer = jmsContext.createDurableConsumer(topic, "ID");
-		//JMSConsumer consumer = jmsContext.createSharedConsumer(topic);
-		//JMSConsumer consumer = jmsContext.createSharedDurableConsumer(topic, "ID");
+		// Tworzenie consumera/subskrybenta
+		JMSConsumer consumer = jmsContext.createConsumer(topic);
+		// JMSConsumer consumer = jmsContext.createDurableConsumer(topic, "ID");
+		// JMSConsumer consumer = jmsContext.createSharedConsumer(topic);
+		// JMSConsumer consumer = jmsContext.createSharedDurableConsumer(topic,
+		// "ID");
+
+		// Tworzenie producera/publishera wysylajacego wiadomosci
 		JMSProducer producer = jmsContext.createProducer();
 
+		// Tworzenie wiadomosci
 		TextMessage message = jmsContext.createTextMessage();
-
 		message.setText("test Message via JMS");
 
+		// Wysylanie
 		producer.send(topic, message);
 
+		// Odbieranie
 		TextMessage recived = (TextMessage) consumer.receive();
 		if (null == recived) {
 			throw new Exception("no message");
 		} else {
 			out.print("message recived : " + recived.getText());
 		}
-		
+
 		if (null != consumer) {
 			consumer.close();
 		}
-		
+
 		if (jmsContext != null) {
 			jmsContext.close();
 		}
 
 		out.println("<br> Test completed <br>");
-		
-		
 	}
 
 	@Deprecated
@@ -118,23 +125,28 @@ public class Examples extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		out.println("Old test start <br>");
 
+		// Tworzenie fabryki polaczen tematow
 		TopicConnectionFactory connFactory = (TopicConnectionFactory) new InitialContext()
 				.lookup("java:comp/env/jmsTCF");
 
+		// Tworzenie sesji dla tematu
 		TopicConnection connection = (TopicConnection) connFactory.createConnection();
-
 		connection.start();
-
 		TopicSession session = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 
+		// Szukanie tematu na podstawie danych JNDI
 		Topic topic = (Topic) new InitialContext().lookup("java:comp/env/jmsTopic");
 
+		// Nowy subskryber
 		TopicSubscriber sub = session.createSubscriber(topic);
 
+		// Nowy publisher
 		TopicPublisher publisher = session.createPublisher(topic);
 
+		// Opublikowanie wiadomosci
 		publisher.publish(session.createTextMessage("PRZYKLADOWA WIADOMOSC"));
 
+		// Odebranie wiadomosci
 		TextMessage message = (TextMessage) sub.receive();
 
 		if (null == message) {
@@ -150,10 +162,11 @@ public class Examples extends HttpServlet {
 		if (connection != null) {
 			connection.close();
 		}
-		
+
 		out.println("<br> Old test completed <br>");
 	}
 
+	// Istnieje tylko po to zeby by³ formularz
 	private void queueTest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// TODO Auto-generated method stub
 		PrintWriter out = response.getWriter();
@@ -165,23 +178,30 @@ public class Examples extends HttpServlet {
 		out.println("<br>Test end <br>");
 	}
 
+	// KOLEJKA
 	private void recieveMessages(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// TODO Auto-generated method stub
 		PrintWriter out = response.getWriter();
 		out.println("Test start <br>");
 
+		// Tworzenie fabryki polaczen kolejek
 		QueueConnectionFactory connectionFactory = (QueueConnectionFactory) new InitialContext()
 				.lookup("java:comp/env/jndi_JMS_BASE_QCF");
 
+		// Wyszukiwanie kolejki z JNDI
 		Queue queue = (Queue) new InitialContext().lookup("java:comp/env/jndi_INPUT_Q");
 
+		// Tworzenie kontekstu JMS
 		JMSContext jmsContext = connectionFactory.createContext();
 
+		// Tworzenie consumera
 		JMSConsumer consumer = jmsContext.createConsumer(queue);
 		// JMSConsumer consumer =
 		// jmsContext.createConsumer(queue,"COLOR='BLUE'");
 		// JMSConsumer consumer =
 		// jmsContext.createConsumer(queue,"COLOR='RED'");
+		
+		// Odbieranie wszystkich wiadomosci do kolejki
 		TextMessage msg = null;
 		boolean isMessageRecived = false;
 		do {
