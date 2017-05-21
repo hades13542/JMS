@@ -1,0 +1,92 @@
+<server description="new server">
+
+	<!-- Enable features -->
+	<featureManager>
+		<feature>javaee-7.0</feature>
+		<feature>localConnector-1.0</feature>
+		<feature>wasJmsServer-1.0</feature>
+	</featureManager>
+
+	<httpEndpoint host="*" httpPort="9080" id="defaultHttpEndpoint">
+		<tcpOptions soReuseAddr="true"/>
+	</httpEndpoint>
+	
+	<messagingEngine>
+		<queue id="QUEUE1"> </queue>
+	</messagingEngine>
+
+	<wasJmsEndpoint host="*" wasJmsPort="7278" wasJmsSSLPort="9100">
+	</wasJmsEndpoint> 
+	
+	<jmsTopicConnectionFactory jndiName="jmsTCF">
+		<properties.wasJms clientID="defaultID"/>
+	</jmsTopicConnectionFactory>
+
+	<jmsQueue jndiName="jndi_INPUT_Q">
+		<properties.wasJms queueName="QUEUE1"/>
+	</jmsQueue>
+	
+	<jmsTopic jndiName="jmsTopic">
+		<properties.wasJms topicName="Football"/>
+	</jmsTopic>
+
+	<jmsQueueConnectionFactory jndiName="jndi_JMS_BASE_QCF">
+		<properties.wasJms remoteServerAddress="localhost:7278:BootStrapBasicMessaging"/>
+	</jmsQueueConnectionFactory>
+	<!-- This template enables security. To get the full use of all the capabilities, 
+		a keystore and user registry are required. -->
+
+	<!-- For the keystore, default keys are generated and stored in a keystore. 
+		To provide the keystore password, generate an encoded password using bin/securityUtility 
+		encode and add it below in the password attribute of the keyStore element. 
+		Then uncomment the keyStore element. -->
+	<!-- <keyStore password=""/> -->
+	
+	<library filesetRef="${wlp.server.name}" id="ElephantSQL">
+		<fileset dir="${server.config.dir}/resources/lib" includes="postgresql-9.3-1104.jdbc41.jar"/>
+	</library>
+	<library filesetRef="${wlp.server.name}" id="dashDB">
+		<fileset dir="${server.config.dir}/resources/lib" includes="db2jcc4.jar"/>
+	</library>
+	
+	<dataSource jndiName="jdbc/postgresql" statementCacheSize="10" type="javax.sql.DataSource">
+		<jdbcDriver libraryRef="ElephantSQL"/>
+		<properties databaseName="nckozgqy" password="hf98eiizdMXO5qS_JyGCmSL3c2dtJNnn" portNumber="5432" serverName="horton.elephantsql.com" user="nckozgqy"/>
+		<connectionManager maxPoolSize="3" purgePolicy="FailingConnectionOnly"/>
+	</dataSource>
+
+	<dataSource jndiName="jdbc/dashdb" statementCacheSize="10" type="javax.sql.DataSource">
+		<jdbcDriver libraryRef="dashDB"/>
+		<properties.db2.jcc databaseName="BLUDB" password="wDR)@0UJu4ji" portNumber="50000" serverName="dashdb-entry-yp-dal09-09.services.dal.bluemix.net" user="dash9733"/>
+		<connectionManager maxPoolSize="3" purgePolicy="FailingConnectionOnly"/>
+	</dataSource> 
+	
+	<!--For a user registry configuration, configure your user registry. For 
+		example, configure a basic user registry using the basicRegistry element. 
+		Specify your own user name below in the name attribute of the user element. 
+		For the password, generate an encoded password using bin/securityUtility 
+		encode and add it in the password attribute of the user element. Then uncomment 
+		the user element. -->
+	<basicRegistry id="basic" realm="BasicRealm">
+		<!-- <user name="yourUserName" password="" /> -->
+	</basicRegistry>
+
+	<!-- To access this server from a remote client add a host attribute to 
+		the following element, e.g. host="*" -->
+	<httpEndpoint httpPort="9080" httpsPort="9440" id="defaultHttpEndpoint"/>
+
+	<!-- Automatically expand WAR files and EAR files -->
+	<applicationManager autoExpand="true"/>
+
+<cors allowCredentials="true" allowedHeaders="accept, content-type" allowedMethods="GET, DELETE, POST, PUT" allowedOrigins="*" domain="rest-jpa/person/" maxAge="3600"/>
+  
+	<applicationMonitor updateTrigger="mbean"/>
+
+	<keyStore id="defaultKeyStore" password="dawiddawiddawd"/>
+
+	<basicRegistry id="basic" realm="BasicRealm">
+		<user name="admin" password="admin"/>
+	</basicRegistry>
+
+    <webApplication id="JMS" location="JMS.war" name="JMS"/>
+</server>
